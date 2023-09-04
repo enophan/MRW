@@ -10,7 +10,5 @@
 ## 技术栈
 - Vite
 - Vue
-- VueUse
 - Pinia
-- UnoCss
-- Iconify
+- less
