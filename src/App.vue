@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Quiz from './components/Quiz.vue';
+import Chat from './components/chat/Chat.vue';
 </script>
 
 <template>
-  <Quiz></Quiz>
+  <Chat></Chat>
 </template>
 
 <style scoped></style>
