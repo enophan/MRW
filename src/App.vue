@@ -3,7 +3,14 @@ import Chat from './components/chat/Chat.vue';
 </script>
 
 <template>
-  <Chat></Chat>
+  <div class="app">
+    <Chat></Chat>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.app {
+  width: 400px;
+  height: 600px;
+}
+</style>

@@ -5,10 +5,11 @@ interface chatMessage {
   role: "user" | "assistant";
   content: string;
 }
+
 const messageList = ref<chatMessage[]>([
   {
     role: "assistant",
-    content: "AI聊天助手的提示信息。"
+    content: "AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息。"
   },
   {
     role: "user",
@@ -25,19 +26,29 @@ const messageList = ref<chatMessage[]>([
   <div class="chat-box">
     <div class="message-window">
       <div class="message-cell" v-for="message in messageList" :class="`message-cell-${message.role}`">
-        <div :class="`${message.role}-avator`"></div>
-        <div class="message-content">{{ message.content }}</div>
+        <div class="avator">
+          <div :class="`avator-${message.role}`"></div>
+        </div>
+        <div class="message-content">
+          <span>
+            {{ message.content }}
+          </span>
+        </div>
       </div>
     </div>
-    <div class="send-bar"></div>
+    <div class="send-bar">
+      <input type="text" class="message-input" placeholder="输入……">
+      <input type="button" value="发送" class="send-button">
+    </div>
   </div>
 </template>
 
-<style lang="less" scoped>
+<style scoped lang="less">
+@message-content-boxInner: 10px;
+
 .chat-box {
-  width: 400px;
-  height: 600px;
-  border: 3px solid black;
+  width: 100%;
+  height: 100%;
 
   display: flex;
   flex-direction: column;
@@ -46,30 +57,16 @@ const messageList = ref<chatMessage[]>([
 
 .message-window {
   flex-grow: 1;
-  background-color: bisque;
+  background-color: rgb(247, 248, 249);
 
   display: flex;
   flex-direction: column;
 
-}
-
-.avator {
-  padding-right: 15px;
-}
-
-.user-avator {
-  .avator();
-  background-image: radial-gradient(circle at right, #0C7BB3, #F2BAE8);
-}
-
-.assistant-avator {
-  .avator();
-  background-image: radial-gradient(circle at left, #EEBD89, #DE3ABD);
+  padding: 0 15px;
 }
 
 .message-cell {
-  border: 3px solid blue;
-
+  margin: 10px 0px;
   display: flex;
 
   &-assistant {
@@ -81,9 +78,62 @@ const messageList = ref<chatMessage[]>([
   }
 }
 
+.avator {
+  display: flex;
+  align-items: center;
+  width: 45px;
+  height: 45px;
+
+  &-user {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-left: 10px;
+    background-image: radial-gradient(circle at right, #0C7BB3, #F2BAE8);
+  }
+
+  &-assistant {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-image: radial-gradient(circle at left, #EEBD89, #DE3ABD);
+  }
+}
+
+.message-content {
+  padding: @message-content-boxInner;
+  background-color: rgb(0, 136, 255);
+  border-radius: 5px;
+}
+
 .send-bar {
   width: 100%;
-  height: 60px;
-  background-color: azure;
+  height: 50px;
+  display: flex;
+}
+
+.message-input {
+  flex: 4;
+  margin-right: 10px;
+  border: none;
+  padding: 10px;
+  background-color: rgba(148, 163, 184, .15);
+}
+
+.message-input:focus {
+  outline: none;
+  background-color: rgba(148, 163, 184, .25);
+}
+
+.send-button {
+  flex: 1;
+  border: none;
+  background-color: rgba(148, 163, 184, .15);
+  font-size: 16px;
+
+  &:active {
+    background-color: rgba(148, 163, 184, .25);
+  }
 }
 </style>
