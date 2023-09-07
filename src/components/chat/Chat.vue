@@ -2,18 +2,22 @@
 import { nextTick, ref } from 'vue';
 import CryptoJs from 'crypto-js'
 import * as base64 from 'base-64'
-import { ChatMessage, SparkAPICredentials } from './types.ts'
+import {
+  ChatMessage,
+  SparkAPICredentials,
+  UserData
+} from './types.ts'
 
 
 let userMessageContent = ref("");
 let messageWindow = ref<HTMLElement>();
 const aipCredentials: SparkAPICredentials = {
-  APPID: '  ',
-  APISecret: ' ',
-  APIKey: ' ',
+  APPID: '6833b54e',
+  APISecret: 'MzgzYmFkNDRhYWQxM2UzNjAwYzM4ZTMy',
+  APIKey: '08ac3ff24d928dcbe748b5528afbbe4e',
 };
 
-const user = {
+const userData: UserData = {
   id: "user"
 };
 
@@ -63,7 +67,11 @@ function getWebsocketUrl(sparkRequest: SparkAPICredentials) {
 
 };
 
-function getSparkRequestParam(sparkAPI: SparkAPICredentials, messageContent: string | undefined) {
+function getSparkRequestParam(
+  sparkAPI: SparkAPICredentials,
+  messageContent: string | undefined,
+  user: UserData
+) {
   let param = {
     "header": {
       "app_id": sparkAPI.APPID,
@@ -91,7 +99,7 @@ async function getSparkReply(userMessageContent: string | undefined) {
   let url: string = await getWebsocketUrl(aipCredentials)
   let socket = new WebSocket(url);
   socket.onopen = () => {
-    let param = getSparkRequestParam(aipCredentials, userMessageContent)
+    let param = getSparkRequestParam(aipCredentials, userMessageContent, userData)
     socket.send(JSON.stringify(param))
   }
   socket.onmessage = (event) => {

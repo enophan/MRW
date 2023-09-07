@@ -8,3 +8,7 @@ export interface SparkAPICredentials {
   APIKey: string,
   APISecret: string,
 };
+
+export interface UserData {
+  id: string
+}
