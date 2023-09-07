@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
+import CryptoJs from 'crypto-js'
+import * as base64 from 'base-64'
+import { ChatMessage, SparkAPICredentials } from './types.ts'
 
-interface chatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
 
-const messageList = ref<chatMessage[]>([
+let userMessageContent = ref("");
+let messageWindow = ref<HTMLElement>();
+const aipCredentials: SparkAPICredentials = {
+  APPID: '  ',
+  APISecret: ' ',
+  APIKey: ' ',
+};
+
+const user = {
+  id: "user"
+};
+
+const messageList = ref<ChatMessage[]>([
   {
     role: "assistant",
-    content: "AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息AI聊天助手的提示信息。"
+    content: "AI聊天助手的提示信息"
   },
   {
     role: "user",
@@ -19,26 +30,128 @@ const messageList = ref<chatMessage[]>([
     role: "assistant",
     content: "AI回复"
   }
-])
+]);
+
+function sendMessage(messageContent: string | undefined) {
+  let message: ChatMessage = {
+    role: "user",
+    content: messageContent
+  }
+  messageList.value.push(message);
+  userMessageContent.value = ""
+  scrollToBottom();
+  getSparkReply(messageContent);
+};
+
+function getWebsocketUrl(sparkRequest: SparkAPICredentials) {
+  return new Promise<string>((resovle,) => {
+    let url = "wss://spark-api.xf-yun.com/v1.1/chat";
+    let host = "spark-api.xf-yun.com";
+    let apiKeyName = "api_key";
+    let date = new Date().toUTCString();
+    let algorithm = "hmac-sha256"
+    let headers = "host date request-line";
+    let signatureOrigin = `host: ${host}\ndate: ${date}\nGET /v1.1/chat HTTP/1.1`;
+    let signatureSha = CryptoJs.HmacSHA256(signatureOrigin, sparkRequest.APISecret);
+    let signature = CryptoJs.enc.Base64.stringify(signatureSha);
+    let authorizationOrigin = `${apiKeyName}="${sparkRequest.APIKey}", algorithm="${algorithm}", headers="${headers}", signature="${signature}"`;
+    let authorization = base64.encode(authorizationOrigin);
+    // 将空格编码
+    url = `${url}?authorization=${authorization}&date=${encodeURI(date)}&host=${host}`;
+    resovle(url)
+  })
+
+};
+
+function getSparkRequestParam(sparkAPI: SparkAPICredentials, messageContent: string | undefined) {
+  let param = {
+    "header": {
+      "app_id": sparkAPI.APPID,
+      "uid": user.id
+    },
+    "parameter": {
+      "chat": {
+        "domain": "general",
+        "temperature": 0.5,
+        "max_tokens": 1024,
+      }
+    },
+    "payload": {
+      "message": {
+        "text": [
+          { "role": "user", "content": messageContent },
+        ]
+      }
+    }
+  };
+  return param;
+};
+
+async function getSparkReply(userMessageContent: string | undefined) {
+  let url: string = await getWebsocketUrl(aipCredentials)
+  let socket = new WebSocket(url);
+  socket.onopen = () => {
+    let param = getSparkRequestParam(aipCredentials, userMessageContent)
+    socket.send(JSON.stringify(param))
+  }
+  socket.onmessage = (event) => {
+    let data = JSON.parse(event.data);
+    let sparkReplyContent = data.payload.choices.text[0].content;
+    if (data.header.code !== 0) {
+      console.log("出错了", data.header.code, ":", data.header.message);
+      socket.close();
+    }
+    if (data.header.code === 0) {
+      if (data.payload.choices.text && data.header.status === 2) {
+        setTimeout(() => {
+          socket.close()
+        }, 1000)
+      }
+    }
+    addReplyToMsgwindow(sparkReplyContent);
+  }
+};
+
+function addReplyToMsgwindow(reply: string) {
+  if (messageList.value.slice(-1)[0].role == "user") {
+    let sparkResult: ChatMessage = {
+      role: "assistant",
+      content: "",
+    }
+    sparkResult.content = reply;
+    messageList.value.push(sparkResult);
+    return;
+  }
+  messageList.value.slice(-1)[0].content += reply;
+  scrollToBottom()
+};
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (messageWindow.value)
+      messageWindow.value.scrollTop = Number.MAX_SAFE_INTEGER
+  })
+};
+
 </script>
 
 <template>
   <div class="chat-box">
-    <div class="message-window">
+    <div class="message-window" ref="messageWindow">
       <div class="message-cell" v-for="message in messageList" :class="`message-cell-${message.role}`">
         <div class="avator">
           <div :class="`avator-${message.role}`"></div>
         </div>
-        <div class="message-content">
-          <span>
-            {{ message.content }}
-          </span>
+        <div class="message-content" :class="`message-content-${message.role}`" v-if="message.content"
+          v-html="message.content">
         </div>
       </div>
     </div>
     <div class="send-bar">
-      <input type="text" class="message-input" placeholder="输入……">
-      <input type="button" value="发送" class="send-button">
+      <textarea name="" id="" cols="30" rows="10"></textarea>
+      <input type="text" class="message-input" placeholder="请输入你的问题" v-model="userMessageContent"
+        @keydown.enter="sendMessage(userMessageContent)">
+      <input type="button" value="发送" class="send-button" @click="sendMessage(userMessageContent)">
     </div>
   </div>
 </template>
@@ -57,12 +170,10 @@ const messageList = ref<chatMessage[]>([
 
 .message-window {
   flex-grow: 1;
-  background-color: rgb(247, 248, 249);
-
   display: flex;
   flex-direction: column;
-
   padding: 0 15px;
+  overflow-y: auto;
 }
 
 .message-cell {
@@ -103,8 +214,15 @@ const messageList = ref<chatMessage[]>([
 
 .message-content {
   padding: @message-content-boxInner;
-  background-color: rgb(0, 136, 255);
-  border-radius: 5px;
+  border-radius: 12px;
+
+  &-user {
+    background-color: rgb(250, 228, 203);
+  }
+
+  &-assistant {
+    background-color: rgb(242, 242, 242);
+  }
 }
 
 .send-bar {
