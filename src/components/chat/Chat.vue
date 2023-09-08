@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue';
+import { ref } from 'vue';
 import CryptoJs from 'crypto-js'
 import * as base64 from 'base-64'
 import {
@@ -8,13 +8,14 @@ import {
   UserData
 } from './types.ts'
 
+import MessageWindow from './MessageWindow.vue';
 
-let userMessageContent = ref("");
-let messageWindow = ref<HTMLElement>();
+
+let userMessageContent = ref("详细介绍一下自己");
 const aipCredentials: SparkAPICredentials = {
-  APPID: '6833b54e',
-  APISecret: 'MzgzYmFkNDRhYWQxM2UzNjAwYzM4ZTMy',
-  APIKey: '08ac3ff24d928dcbe748b5528afbbe4e',
+  APPID: '  ',
+  APISecret: ' ',
+  APIKey: ' ',
 };
 
 const userData: UserData = {
@@ -33,7 +34,33 @@ const messageList = ref<ChatMessage[]>([
   {
     role: "assistant",
     content: "AI回复"
-  }
+  },
+  {
+    role: "user",
+    content: "用户回复"
+  },
+  {
+    role: "assistant",
+    content: "AI回复"
+  },
+  {
+    role: "user",
+    content: "用户回复"
+  }, {
+    role: "assistant",
+    content: "AI回复"
+  },
+  {
+    role: "user",
+    content: "用户回复"
+  }, {
+    role: "assistant",
+    content: "AI回复"
+  },
+  {
+    role: "user",
+    content: "用户回复"
+  },
 ]);
 
 function sendMessage(messageContent: string | undefined) {
@@ -42,8 +69,9 @@ function sendMessage(messageContent: string | undefined) {
     content: messageContent
   }
   messageList.value.push(message);
+  console.log(messageContent)
   userMessageContent.value = ""
-  scrollToBottom();
+  // scrollToBottom();
   getSparkReply(messageContent);
 };
 
@@ -131,32 +159,15 @@ function addReplyToMsgwindow(reply: string) {
     return;
   }
   messageList.value.slice(-1)[0].content += reply;
-  scrollToBottom()
-};
-
-function scrollToBottom() {
-  nextTick(() => {
-    if (messageWindow.value)
-      messageWindow.value.scrollTop = Number.MAX_SAFE_INTEGER
-  })
+  // scrollToBottom()
 };
 
 </script>
 
 <template>
   <div class="chat-box">
-    <div class="message-window" ref="messageWindow">
-      <div class="message-cell" v-for="message in messageList" :class="`message-cell-${message.role}`">
-        <div class="avator">
-          <div :class="`avator-${message.role}`"></div>
-        </div>
-        <div class="message-content" :class="`message-content-${message.role}`" v-if="message.content"
-          v-html="message.content">
-        </div>
-      </div>
-    </div>
+    <MessageWindow :message-list="messageList" class="message-window" />
     <div class="send-bar">
-      <textarea name="" id="" cols="30" rows="10"></textarea>
       <input type="text" class="message-input" placeholder="请输入你的问题" v-model="userMessageContent"
         @keydown.enter="sendMessage(userMessageContent)">
       <input type="button" value="发送" class="send-button" @click="sendMessage(userMessageContent)">
@@ -165,8 +176,6 @@ function scrollToBottom() {
 </template>
 
 <style scoped lang="less">
-@message-content-boxInner: 10px;
-
 .chat-box {
   width: 100%;
   height: 100%;
@@ -178,59 +187,6 @@ function scrollToBottom() {
 
 .message-window {
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 0 15px;
-  overflow-y: auto;
-}
-
-.message-cell {
-  margin: 10px 0px;
-  display: flex;
-
-  &-assistant {
-    flex-direction: row;
-  }
-
-  &-user {
-    flex-direction: row-reverse;
-  }
-}
-
-.avator {
-  display: flex;
-  align-items: center;
-  width: 45px;
-  height: 45px;
-
-  &-user {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    margin-left: 10px;
-    background-image: radial-gradient(circle at right, #0C7BB3, #F2BAE8);
-  }
-
-  &-assistant {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    margin-right: 10px;
-    background-image: radial-gradient(circle at left, #EEBD89, #DE3ABD);
-  }
-}
-
-.message-content {
-  padding: @message-content-boxInner;
-  border-radius: 12px;
-
-  &-user {
-    background-color: rgb(250, 228, 203);
-  }
-
-  &-assistant {
-    background-color: rgb(242, 242, 242);
-  }
 }
 
 .send-bar {
