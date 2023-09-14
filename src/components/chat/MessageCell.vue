@@ -1,9 +1,13 @@
 <script setup lang="ts">
-
+import { ChatMessage } from './types';
+import type { PropType } from 'vue';
+defineProps({
+  message: Object as PropType<ChatMessage>,
+})
 </script>
 
 <template>
-  <div class="message-cell" v-for="message in messageList" :class="`message-cell-${message.role}`">
+  <div class="message-cell" v-if="message" :class="`message-cell-${message.role}`">
     <div class="avator">
       <div :class="`avator-${message.role}`"></div>
     </div>

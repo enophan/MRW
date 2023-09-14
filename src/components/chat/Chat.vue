@@ -9,13 +9,14 @@ import {
 } from './types.ts'
 
 import MessageWindow from './MessageWindow.vue';
+import ChatSendBar from './ChatSendBar.vue';
 
 
 let userMessageContent = ref("详细介绍一下自己");
 const aipCredentials: SparkAPICredentials = {
-  APPID: '  ',
-  APISecret: ' ',
-  APIKey: ' ',
+  APPID: '6833b54e',
+  APISecret: 'MzgzYmFkNDRhYWQxM2UzNjAwYzM4ZTMy',
+  APIKey: '08ac3ff24d928dcbe748b5528afbbe4e',
 };
 
 const userData: UserData = {
@@ -66,12 +67,10 @@ const messageList = ref<ChatMessage[]>([
 function sendMessage(messageContent: string | undefined) {
   let message: ChatMessage = {
     role: "user",
-    content: messageContent
+    content: messageContent,
   }
   messageList.value.push(message);
-  console.log(messageContent)
-  userMessageContent.value = ""
-  // scrollToBottom();
+  userMessageContent.value = "";
   getSparkReply(messageContent);
 };
 
@@ -167,11 +166,7 @@ function addReplyToMsgwindow(reply: string) {
 <template>
   <div class="chat-box">
     <MessageWindow :message-list="messageList" class="message-window" />
-    <div class="send-bar">
-      <input type="text" class="message-input" placeholder="请输入你的问题" v-model="userMessageContent"
-        @keydown.enter="sendMessage(userMessageContent)">
-      <input type="button" value="发送" class="send-button" @click="sendMessage(userMessageContent)">
-    </div>
+    <ChatSendBar v-model="userMessageContent" />
   </div>
 </template>
 
@@ -187,35 +182,5 @@ function addReplyToMsgwindow(reply: string) {
 
 .message-window {
   flex-grow: 1;
-}
-
-.send-bar {
-  width: 100%;
-  height: 50px;
-  display: flex;
-}
-
-.message-input {
-  flex: 4;
-  margin-right: 10px;
-  border: none;
-  padding: 10px;
-  background-color: rgba(148, 163, 184, .15);
-}
-
-.message-input:focus {
-  outline: none;
-  background-color: rgba(148, 163, 184, .25);
-}
-
-.send-button {
-  flex: 1;
-  border: none;
-  background-color: rgba(148, 163, 184, .15);
-  font-size: 16px;
-
-  &:active {
-    background-color: rgba(148, 163, 184, .25);
-  }
 }
 </style>

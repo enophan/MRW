@@ -2,7 +2,7 @@
 import { ref, onUpdated } from 'vue';
 import { ChatMessage } from './types';
 import type { PropType } from 'vue'
-defineProps({
+const props = defineProps({
   messageList: Object as PropType<ChatMessage[]>,
 })
 
@@ -28,7 +28,7 @@ onUpdated(
 
 <template>
   <div class="message-window" ref="messageWindow">
-    <div class="message-cell" v-for="message in messageList" :class="`message-cell-${message.role}`">
+    <div class="message-cell" v-for="message in props.messageList" :class="`message-cell-${message.role}`">
       <div class="avator">
         <div :class="`avator-${message.role}`"></div>
       </div>
